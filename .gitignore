@@ -1,6 +1,7 @@
 
 # do not include data files and r history
 .Rhistory/
+.Rhistory
 .Rapp.history
-
+.DS_Store
 .Rproj.user
