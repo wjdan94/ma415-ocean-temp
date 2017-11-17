@@ -3,6 +3,7 @@
 # Libraries required
 require(maps)
 require(mapdata)
+library(xlsx)
 library(ggplot2)
 library(ggrepel)
 
@@ -13,17 +14,24 @@ if (length(args) >= 4) {
   START = as.numeric(args[1])
   END = as.numeric(args[2])
   SAVE_PATH = args[3]
-  SAVE_DIR = args[4]
+  SAVE_DIR_Rdata = args[4]
+  SAVE_DIR_XLSX = args[5]
 } else {
   START = 2001
   END = 2016
   SAVE_PATH = "./"               # path for saving and opening data files
-  SAVE_DIR = "cleaned_data"   # name of directory to save the clean data
+  SAVE_DIR_Rdata = "cleaned_data_Rdata"   # name of directory to save the clean data
+  SAVE_DIR_XLSX = "cleaned_data_xlsx"
 }
 
 # info to save the clean data
 FILENAME = "df"
-SAVE_EXT = ".Rdata"
+SAVE_EXT_RDATA = ".Rdata"
+
+# xlsx file name
+XLSX_FILENAME = "cleaned_data"
+SAVE_EXT_XLSX = ".xlsx"
+SAVE_PATH_XLSX = paste(SAVE_PATH, SAVE_DIR_XLSX, "/", XLSX_FILENAME, SAVE_EXT_XLSX, sep = "")
 
 # info to construct the filenames
 MONTHS = c("jan", "feb", "mar",
@@ -206,18 +214,22 @@ cleanAllMonthsOfYear <- function(YEAR) {
   MAP_PATH = paste(SAVE_PATH, "maps/", sep = "") 
   ggsave(filename=MAP_NAME, path=MAP_PATH)
 
-  # create the save path for the clean data and save it
-  SAVE_PATH_ALL = paste(SAVE_PATH, SAVE_DIR, "/", FILENAME, "_", YEAR, SAVE_EXT, sep = "")
+  # create and save path for the clean data and save it as Rmd (comment out if not needed)
+  SAVE_PATH_ALL = paste(SAVE_PATH, SAVE_DIR_Rdata, "/", FILENAME, "_", YEAR, SAVE_EXT_RDATA, sep = "")
   print(paste("Saving", SAVE_PATH_ALL))
   save(df.year, file = SAVE_PATH_ALL)
 
+  # create and save the path for the clean data and save it as xlsx
+  print(paste("Saving new sheet for year", YEAR, "in",  SAVE_PATH_XLSX))
+  write.xlsx2(df.year, file=SAVE_PATH_XLSX, sheetName=YEAR, append=TRUE, row.names=FALSE, col.names=TRUE)
+
   # name the columns, create path and save the data for EDA
   names(EDA.year) = c("month","ave.sea.temp","ave.air.temp")
-  SAVE_PATH_AVE = paste(SAVE_PATH, "eda_data/", "ave_temp", "_", YEAR, SAVE_EXT, sep = "")
+  SAVE_PATH_AVE = paste(SAVE_PATH, "eda_data/", "ave_temp", "_", YEAR, SAVE_EXT_RDATA, sep = "")
   save(EDA.year, file = SAVE_PATH_AVE)
 
   # create the path and save data for EDA
-  SAVE_PATH_EXTEREMES = paste(SAVE_PATH, "eda_data/", "data_with_extremes", "_", YEAR, SAVE_EXT, sep = "")
+  SAVE_PATH_EXTEREMES = paste(SAVE_PATH, "eda_data/", "data_with_extremes", "_", YEAR, SAVE_EXT_RDATA, sep = "")
   save(df.year.with.extremes, file = SAVE_PATH_EXTEREMES)
 }
 
